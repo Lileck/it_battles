@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import BattleEvent, Team, Submission, Vote
 
-# Register your models here.
+admin.site.register(BattleEvent)
+admin.site.register(Team)
+admin.site.register(Submission)
+admin.site.register(Vote)
