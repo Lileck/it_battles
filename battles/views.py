@@ -7,6 +7,9 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from .models import Vote
 from django.views.decorators.csrf import csrf_exempt
+import base64
+from io import BytesIO
+import qrcode
 
 
 def submit_solution(request, event_id):
@@ -39,8 +42,17 @@ def submit_solution(request, event_id):
     return render(request, 'battles/submit.html', {'event': event, 'form': form})
 def host_dashboard(request, event_id):
     event = get_object_or_404(BattleEvent, id=event_id)
-    return render(request, 'battles/host.html', {'event': event})
+    vote_url = request.build_absolute_uri(f'/battle/{event.id}/vote/')
+    qr = qrcode.make(vote_url)
+    buffer = BytesIO()
+    qr.save(buffer, format='PNG')
+    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
 
+    return render(request, 'battles/host.html', {
+        'event': event,
+        'vote_url': vote_url,
+        'qr_base64': qr_base64,
+    })
 
 def results_fragment(request, event_id):
     event = get_object_or_404(BattleEvent, id=event_id)

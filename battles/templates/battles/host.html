@@ -36,6 +36,13 @@
 <body>
     <h1>{{ event.title }}</h1>
     <p>Статус: {{ event.get_status_display }}</p>
+    <div style="background: #2a2a2a; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
+        <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR-код для голосования" style="width: 150px; height: 150px; background: white; padding: 10px; border-radius: 4px;">
+        <div>
+            <p style="margin: 0; font-size: 1.1em;">Отсканируйте QR-код, чтобы проголосовать</p>
+            <p style="margin: 5px 0 0; color: #888; font-size: 0.9em;">{{ vote_url }}</p>
+        </div>
+    </div>
 
     <div hx-get="{% url 'results_fragment' event.id %}"
          hx-trigger="load, every 3s"
