@@ -3,6 +3,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from pygments.formatters import HtmlFormatter
 from .forms import SubmissionForm
 from .models import BattleEvent, Submission
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
+from .models import Vote
+from django.views.decorators.csrf import csrf_exempt
 
 
 def submit_solution(request, event_id):
@@ -56,3 +60,50 @@ def results_fragment(request, event_id):
         'submissions': submissions,
         'pygments_css': pygments_css,
     })
+def vote_page(request, event_id):
+    event = get_object_or_404(BattleEvent, id=event_id)
+
+    if event.status != BattleEvent.STATUS_VOTING:
+        return render(request, 'battles/vote_closed.html', {'event': event})
+
+    if not request.session.session_key:
+        request.session.create()
+    voter_key = request.session.session_key
+
+    submissions = event.submission_set.all()
+
+
+    for sub in submissions:
+        sub.has_voted = Vote.objects.filter(
+            submission=sub,
+            voter_key=voter_key,
+        ).exists()
+
+    return render(request, 'battles/vote.html', {
+        'event': event,
+        'submissions': submissions,
+    })
+
+@csrf_exempt
+@require_POST
+def cast_vote(request, submission_id):
+    submission = get_object_or_404(Submission, id=submission_id)
+    event = submission.event
+
+    if event.status != BattleEvent.STATUS_VOTING:
+        return HttpResponse('<div class="badge">Голосование закрыто</div>')
+
+    if not request.session.session_key:
+        request.session.create()
+    voter_key = request.session.session_key
+
+    already_voted = Vote.objects.filter(
+        submission__event=event,
+        voter_key=voter_key,
+    ).exists()
+
+    if already_voted:
+        return HttpResponse('<div class="badge">Вы уже голосовали</div>')
+
+    Vote.objects.create(submission=submission, voter_key=voter_key)
+    return HttpResponse('<div class="badge">Голос учтён!</div>')
