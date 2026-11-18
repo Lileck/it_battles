@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Экран ведущего — {{ event.title }}</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        body {
+            background: #1e1e1e;
+            color: #eee;
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        h1 { color: #4caf50; }
+        .card {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h2 { margin-top: 0; }
+        .votes {
+            font-size: 1.5em;
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .code {
+            background: #272822;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .empty { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>{{ event.title }}</h1>
+    <p>Статус: {{ event.get_status_display }}</p>
+
+    <div hx-get="{% url 'results_fragment' event.id %}"
+         hx-trigger="load, every 3s"
+         hx-swap="innerHTML">
+        Загрузка...
+    </div>
+</body>
+</html>

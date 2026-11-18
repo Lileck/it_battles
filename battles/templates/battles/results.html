@@ -1,0 +1,15 @@
+{% load pygments_filter %}
+
+<style>{{ pygments_css|safe }}</style>
+
+{% for sub in submissions %}
+    <div class="card">
+        <h2>{{ sub.team.name }}</h2>
+        <div class="votes">Голосов: {{ sub.vote_count }}</div>
+        <div class="code">
+            {{ sub.code_snapshot|pygmentize|safe }}
+        </div>
+    </div>
+{% empty %}
+    <p class="empty">Решений пока нет.</p>
+{% endfor %}
